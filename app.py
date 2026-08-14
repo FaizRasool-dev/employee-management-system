@@ -11,7 +11,28 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT COUNT(*) FROM employees")
+        total_employees = cursor.fetchone()[0]
+
+        return render_template(
+            "index.html",
+            total_employees=total_employees
+        )
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
 
 
 @app.route("/test-db")
@@ -141,56 +162,62 @@ def employees():
 
     search = request.args.get("search", "").strip()
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection = None
+    cursor = None
 
-    if search:
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
 
-        search_value = f"%{search}%"
+        if search:
+            query = """
+                SELECT employee_id,
+                       first_name,
+                       last_name,
+                       email,
+                       phone,
+                       department,
+                       salary,
+                       hire_date
+                FROM employees
+                WHERE LOWER(first_name) LIKE LOWER(:search)
+                   OR LOWER(last_name) LIKE LOWER(:search)
+                   OR LOWER(email) LIKE LOWER(:search)
+                   OR LOWER(phone) LIKE LOWER(:search)
+                   OR LOWER(department) LIKE LOWER(:search)
+                ORDER BY employee_id
+            """
 
-        cursor.execute("""
-            SELECT employee_id,
-                   first_name,
-                   last_name,
-                   email,
-                   phone,
-                   department,
-                   salary,
-                   hire_date
-            FROM employees
-            WHERE LOWER(first_name) LIKE LOWER(:search_value)
-               OR LOWER(last_name) LIKE LOWER(:search_value)
-               OR LOWER(email) LIKE LOWER(:search_value)
-               OR LOWER(phone) LIKE LOWER(:search_value)
-               OR LOWER(department) LIKE LOWER(:search_value)
-            ORDER BY employee_id
-        """, search_value=search_value)
+            cursor.execute(query, {"search": f"%{search}%"})
 
-    else:
+        else:
+            cursor.execute("""
+                SELECT employee_id,
+                       first_name,
+                       last_name,
+                       email,
+                       phone,
+                       department,
+                       salary,
+                       hire_date
+                FROM employees
+                ORDER BY employee_id
+            """)
 
-        cursor.execute("""
-            SELECT employee_id,
-                   first_name,
-                   last_name,
-                   email,
-                   phone,
-                   department,
-                   salary,
-                   hire_date
-            FROM employees
-            ORDER BY employee_id
-        """)
+        employees = cursor.fetchall()
 
-    employees = cursor.fetchall()
+        return render_template(
+            "employees.html",
+            employees=employees,
+            search=search
+        )
 
-    cursor.close()
-    connection.close()
+    finally:
+        if cursor:
+            cursor.close()
 
-    return render_template(
-        "employees.html",
-        employees=employees,
-        search=search
-    )
+        if connection:
+            connection.close()
 
 @app.route("/edit-employee/<int:employee_id>", methods=["GET", "POST"])
 def edit_employee(employee_id):
@@ -339,23 +366,37 @@ def edit_employee(employee_id):
         employee=employee
     )
 
-@app.route("/delete-employee/<int:employee_id>")
+@app.route("/delete-employee/<int:employee_id>", methods=["POST"])
 def delete_employee(employee_id):
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection = None
+    cursor = None
 
-    cursor.execute("""
-        DELETE FROM employees
-        WHERE employee_id = :employee_id
-    """, employee_id=employee_id)
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
 
-    connection.commit()
+        cursor.execute("""
+            DELETE FROM employees
+            WHERE employee_id = :employee_id
+        """, employee_id=employee_id)
 
-    cursor.close()
-    connection.close()
+        connection.commit()
 
-    flash("Employee deleted successfully!", "success")
+        flash("Employee deleted successfully!", "success")
+
+    except Exception as e:
+        if connection:
+            connection.rollback()
+
+        flash("Unable to delete employee. Please try again.", "danger")
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
 
     return redirect(url_for("employees"))
 
