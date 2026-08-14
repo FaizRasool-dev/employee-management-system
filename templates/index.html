@@ -194,6 +194,62 @@
 
         </div>
 
+        <!-- Salary Analytics -->
+        <div class="row g-4 mt-4">
+
+            <!-- Highest Salary -->
+            <div class="col-md-6">
+
+                <div class="card dashboard-card shadow-sm border-0 h-100">
+
+                    <div class="card-body text-center py-4">
+
+                        <div class="card-icon">
+                            ⬆️
+                        </div>
+
+                        <h5 class="text-muted">
+                            Highest Salary
+                        </h5>
+
+                        <div class="stat-number">
+                            Rs. {{ "{:,.2f}".format(highest_salary) }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Lowest Salary -->
+            <div class="col-md-6">
+
+                <div class="card dashboard-card shadow-sm border-0 h-100">
+
+                    <div class="card-body text-center py-4">
+
+                        <div class="card-icon">
+                            ⬇️
+                        </div>
+
+                        <h5 class="text-muted">
+                            Lowest Salary
+                        </h5>
+
+                        <div class="stat-number">
+                            Rs. {{ "{:,.2f}".format(lowest_salary) }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
         <!-- Quick Actions -->
         <div class="mt-5">
 

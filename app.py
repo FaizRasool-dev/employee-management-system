@@ -47,6 +47,24 @@ def home():
         average_salary = cursor.fetchone()[0]
 
 
+        # Highest Salary
+        cursor.execute("""
+            SELECT NVL(MAX(salary), 0)
+            FROM employees
+        """)
+
+        highest_salary = cursor.fetchone()[0]
+
+
+        # Lowest Salary
+        cursor.execute("""
+            SELECT NVL(MIN(salary), 0)
+            FROM employees
+        """)
+
+        lowest_salary = cursor.fetchone()[0]
+
+
         # Employees by Department
         cursor.execute("""
             SELECT department,
@@ -75,6 +93,8 @@ def home():
             total_employees=total_employees,
             total_departments=total_departments,
             average_salary=average_salary,
+            highest_salary=highest_salary,
+            lowest_salary=lowest_salary,
             department_names=department_names,
             department_counts=department_counts
         )
@@ -89,6 +109,8 @@ def home():
             total_employees=0,
             total_departments=0,
             average_salary=0,
+            highest_salary=0,
+            lowest_salary=0,
             department_names=[],
             department_counts=[]
         )
