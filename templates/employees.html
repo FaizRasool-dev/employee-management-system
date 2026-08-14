@@ -248,28 +248,38 @@
 
                             <td class="text-nowrap">
 
-                                <a
-                                    href="/edit-employee/{{ employee[0] }}"
-                                    class="btn btn-sm btn-primary action-btn">
-                                    Edit
-                                </a>
+                            <!-- View -->
+                            <a
+                                href="/employee/{{ employee[0] }}"
+                                class="btn btn-sm btn-info text-white action-btn">
+                                View
+                            </a>
 
 
-                                <form
-                                    method="POST"
-                                    action="/delete-employee/{{ employee[0] }}"
-                                    style="display:inline;"
-                                    onsubmit="return confirm('Are you sure you want to delete this employee?');">
+                            <!-- Edit -->
+                            <a
+                                href="/edit-employee/{{ employee[0] }}"
+                                class="btn btn-sm btn-primary action-btn">
+                                Edit
+                            </a>
 
-                                    <button
-                                        type="submit"
-                                        class="btn btn-sm btn-danger">
-                                        Delete
-                                    </button>
 
-                                </form>
+                            <!-- Delete -->
+                            <form
+                                method="POST"
+                                action="/delete-employee/{{ employee[0] }}"
+                                style="display:inline;"
+                                onsubmit="return confirm('Are you sure you want to delete this employee?');">
 
-                            </td>
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </td>
 
                         </tr>
 

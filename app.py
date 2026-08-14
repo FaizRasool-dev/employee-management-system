@@ -506,5 +506,51 @@ def delete_employee(employee_id):
 
     return redirect(url_for("employees"))
 
+@app.route("/employee/<int:employee_id>")
+def employee_details(employee_id):
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT employee_id,
+                   first_name,
+                   last_name,
+                   email,
+                   phone,
+                   department,
+                   salary,
+                   hire_date
+            FROM employees
+            WHERE employee_id = :employee_id
+        """, employee_id=employee_id)
+
+        employee = cursor.fetchone()
+
+        if employee is None:
+            flash("Employee not found.", "danger")
+            return redirect(url_for("employees"))
+
+        return render_template(
+            "employee_details.html",
+            employee=employee
+        )
+
+    except Exception:
+        flash("Unable to load employee details.", "danger")
+        return redirect(url_for("employees"))
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
 if __name__ == "__main__":
     app.run(debug=True)
