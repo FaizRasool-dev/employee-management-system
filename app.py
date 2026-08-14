@@ -20,8 +20,13 @@ def home():
         cursor = connection.cursor()
 
         # Total Employees
-        cursor.execute("SELECT COUNT(*) FROM employees")
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM employees
+        """)
+
         total_employees = cursor.fetchone()[0]
+
 
         # Total Departments
         cursor.execute("""
@@ -29,33 +34,68 @@ def home():
             FROM employees
             WHERE department IS NOT NULL
         """)
+
         total_departments = cursor.fetchone()[0]
+
 
         # Average Salary
         cursor.execute("""
             SELECT NVL(AVG(salary), 0)
             FROM employees
         """)
+
         average_salary = cursor.fetchone()[0]
+
+
+        # Employees by Department
+        cursor.execute("""
+            SELECT department,
+                   COUNT(*) AS employee_count
+            FROM employees
+            WHERE department IS NOT NULL
+            GROUP BY department
+            ORDER BY department
+        """)
+
+        department_data = cursor.fetchall()
+
+
+        # Separate department names and employee counts
+        department_names = [
+            row[0] for row in department_data
+        ]
+
+        department_counts = [
+            row[1] for row in department_data
+        ]
+
 
         return render_template(
             "index.html",
             total_employees=total_employees,
             total_departments=total_departments,
-            average_salary=average_salary
+            average_salary=average_salary,
+            department_names=department_names,
+            department_counts=department_counts
         )
 
+
     except Exception as e:
+
         flash("Unable to load dashboard data.", "danger")
 
         return render_template(
             "index.html",
             total_employees=0,
             total_departments=0,
-            average_salary=0
+            average_salary=0,
+            department_names=[],
+            department_counts=[]
         )
 
+
     finally:
+
         if cursor:
             cursor.close()
 
