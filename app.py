@@ -191,6 +191,18 @@ def employees():
     search = request.args.get("search", "").strip()
     department = request.args.get("department", "").strip()
 
+    # Current page
+    try:
+        page = int(request.args.get("page", 1))
+    except ValueError:
+        page = 1
+
+    if page < 1:
+        page = 1
+
+    # Employees per page
+    per_page = 10
+
     connection = None
     cursor = None
 
@@ -198,7 +210,7 @@ def employees():
         connection = get_connection()
         cursor = connection.cursor()
 
-        # Get all departments for filter dropdown
+        # Get departments for dropdown
         cursor.execute("""
             SELECT DISTINCT department
             FROM employees
@@ -208,25 +220,13 @@ def employees():
 
         departments = [row[0] for row in cursor.fetchall()]
 
-        # Base query
-        query = """
-            SELECT employee_id,
-                   first_name,
-                   last_name,
-                   email,
-                   phone,
-                   department,
-                   salary,
-                   hire_date
-            FROM employees
-            WHERE 1 = 1
-        """
-
+        # Base WHERE condition
+        where_clause = "WHERE 1 = 1"
         params = {}
 
         # Search filter
         if search:
-            query += """
+            where_clause += """
                 AND (
                     LOWER(first_name) LIKE LOWER(:search)
                     OR LOWER(last_name) LIKE LOWER(:search)
@@ -240,15 +240,67 @@ def employees():
 
         # Department filter
         if department:
-            query += """
+            where_clause += """
                 AND LOWER(department) = LOWER(:department)
             """
 
             params["department"] = department
 
-        query += """
-            ORDER BY employee_id
+        # Total matching employees
+        count_query = f"""
+            SELECT COUNT(*)
+            FROM employees
+            {where_clause}
         """
+
+        cursor.execute(count_query, params)
+
+        total_employees = cursor.fetchone()[0]
+
+        # Calculate total pages
+        total_pages = max(
+            1,
+            (total_employees + per_page - 1) // per_page
+        )
+
+        # If page is greater than total pages
+        if page > total_pages:
+            page = total_pages
+
+        # Calculate offset
+        offset = (page - 1) * per_page
+
+        # Get employees for current page
+        start_row = offset + 1
+        end_row = offset + per_page
+
+        query = f"""
+                SELECT employee_id,
+                    first_name,
+                    last_name,
+                    email,
+                    phone,
+                    department,
+                    salary,
+                    hire_date
+                FROM (
+                SELECT employee_id,
+                    first_name,
+                    last_name,
+                    email,
+                    phone,
+                    department,
+                    salary,
+                    hire_date,
+                    ROW_NUMBER() OVER (ORDER BY employee_id) AS row_num
+                FROM employees
+                {where_clause}
+            )
+            WHERE row_num BETWEEN :start_row AND :end_row
+        """
+
+        params["start_row"] = start_row
+        params["end_row"] = end_row
 
         cursor.execute(query, params)
 
@@ -260,7 +312,9 @@ def employees():
             search=search,
             department=department,
             departments=departments,
-            result_count=len(employees)
+            result_count=total_employees,
+            page=page,
+            total_pages=total_pages
         )
 
     finally:
