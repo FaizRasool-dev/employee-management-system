@@ -10,214 +10,293 @@
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f8;
+        }
+
+        .page-container {
+            max-width: 1250px;
+            margin: 40px auto;
+        }
+
+        .employee-card {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .table th {
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
+<!-- Navigation -->
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
 
-            <a class="navbar-brand fw-bold" href="/">
-                Employee Management System
+        <a class="navbar-brand fw-bold" href="/">
+            Employee Management System
+        </a>
+
+        <div>
+            <a href="/" class="btn btn-outline-light btn-sm me-2">
+                Dashboard
             </a>
 
-            <div>
-                <a href="/" class="btn btn-outline-light btn-sm me-2">
-                    Dashboard
-                </a>
+            <a href="/employees" class="btn btn-outline-light btn-sm me-2">
+                Employees
+            </a>
 
-                <a href="/add-employee" class="btn btn-success btn-sm">
-                    + Add Employee
-                </a>
-            </div>
-
-        </div>
-    </nav>
-
-
-    <!-- Main Content -->
-    <div class="container mt-5">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-
-        {% if messages %}
-
-            {% for category, message in messages %}
-
-             <div class="alert alert-{{ category }} alert-dismissible fade show"
-                     role="alert">
-
-                    {{ message }}
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert">
-                </button>
-
-            </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-    {% endwith %}
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-
-            <div>
-                <h1 class="mb-1">Employees</h1>
-                <p class="text-muted mb-0">
-                    Manage all employees
-                </p>
-            </div>
-
-            <a href="/add-employee" class="btn btn-success">
+            <a href="/add-employee" class="btn btn-success btn-sm">
                 + Add Employee
             </a>
-
         </div>
 
-<form method="GET" action="/employees" class="mb-4">
-    <div class="input-group">
-        <input
-            type="text"
-            name="search"
-            class="form-control"
-            placeholder="Search by name, email, phone or department..."
-            value="{{ search }}">
+    </div>
+</nav>
 
-        <button type="submit" class="btn btn-primary">
-            🔍 Search
-        </button>
+
+<div class="container-fluid page-container">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="fw-bold mb-1">Employees</h1>
+
+            <p class="text-muted mb-0">
+                Manage employee records
+            </p>
+        </div>
+
+        <a href="/add-employee" class="btn btn-success">
+            + Add Employee
+        </a>
 
     </div>
-</form>
 
-        <!-- Employee Table -->
-        <div class="card shadow-sm">
 
-            <div class="card-body">
+    <!-- Search & Filter Card -->
+    <div class="card employee-card shadow-sm mb-4">
 
-                <div class="table-responsive">
+        <div class="card-body">
 
-                    <table class="table table-hover align-middle">
+            <form method="GET" action="/employees">
 
-                        <thead class="table-dark">
+                <div class="row g-3 align-items-end">
 
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Department</th>
-                                <th>Salary</th>
-                                <th>Hire Date</th>
-                                <th>Actions</th>
-                            </tr>
+                    <!-- Search -->
+                    <div class="col-md-6">
 
-                        </thead>
+                        <label class="form-label fw-bold">
+                            Search Employee
+                        </label>
 
-                        <tbody>
+                        <input
+                            type="text"
+                            name="search"
+                            class="form-control"
+                            placeholder="Name, email, phone or department..."
+                            value="{{ search }}">
 
-                            {% for employee in employees %}
+                    </div>
 
-                            <tr>
 
-                                <td>
-                                    <span class="badge text-bg-secondary">
-                                        {{ employee[0] }}
-                                    </span>
-                                </td>
+                    <!-- Department -->
+                    <div class="col-md-3">
 
-                                <td>
-                                    <strong>
-                                        {{ employee[1] }} {{ employee[2] or '' }}
-                                    </strong>
-                                </td>
+                        <label class="form-label fw-bold">
+                            Department
+                        </label>
 
-                                <td>
-                                    {{ employee[3] or '-' }}
-                                </td>
+                        <select name="department" class="form-select">
 
-                                <td>
-                                    {{ employee[4] or '-' }}
-                                </td>
+                            <option value="">
+                                All Departments
+                            </option>
 
-                                <td>
-                                    {% if employee[5] %}
-                                        <span class="badge text-bg-info">
-                                            {{ employee[5] }}
-                                        </span>
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
+                            {% for dept in departments %}
 
-                                <td>
-                                    {% if employee[6] %}
-                                        {{ "{:,.2f}".format(employee[6]) }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-
-                                <td>
-                                    {% if employee[7] %}
-                                        {{ employee[7].strftime('%Y-%m-%d') }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-
-                                <td>
-
-                                    <a href="/edit-employee/{{ employee[0] }}"
-                                       class="btn btn-sm btn-primary">
-                                        Edit
-                                    </a>
-
-                                    <form method="POST"
-                                        action="/delete-employee/{{ employee[0] }}"
-                                        style="display:inline;"
-                                        onsubmit="return confirm('Are you sure you want to delete this employee?');">
-                                        <button type="submit"
-                                                style="border:none; background:none; color:red; cursor:pointer; padding:0;">
-                                            Delete
-                                        </button>
-
-                                    </form>
-
-                                </td>
-
-                            </tr>
-
-                            {% else %}
-
-                            <tr>
-
-                                <td colspan="8"
-                                    class="text-center text-muted py-4">
-
-                                    No employees found.
-
-                                    <br>
-
-                                    <a href="/add-employee"
-                                       class="btn btn-success btn-sm mt-3">
-                                        Add First Employee
-                                    </a>
-
-                                </td>
-
-                            </tr>
+                                <option value="{{ dept }}"
+                                    {% if department == dept %}selected{% endif %}>
+                                    {{ dept }}
+                                </option>
 
                             {% endfor %}
 
-                        </tbody>
+                        </select>
 
-                    </table>
+                    </div>
+
+
+                    <!-- Buttons -->
+                    <div class="col-md-3">
+
+                        <div class="d-flex gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary w-100">
+                                🔍 Search
+                            </button>
+
+                            <a
+                                href="/employees"
+                                class="btn btn-outline-secondary">
+                                Clear
+                            </a>
+
+                        </div>
+
+                    </div>
 
                 </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Result Count -->
+    <div class="mb-3">
+
+        {% if search or department %}
+
+            <div class="alert alert-info">
+                <strong>{{ result_count }}</strong>
+                employee(s) found.
+            </div>
+
+        {% else %}
+
+            <p class="text-muted">
+                Showing <strong>{{ result_count }}</strong>
+                employee(s)
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Employee Table -->
+    <div class="card employee-card shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-bordered mb-0">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Department</th>
+                            <th>Salary</th>
+                            <th>Hire Date</th>
+                            <th>Actions</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for employee in employees %}
+
+                        <tr>
+
+                            <td>{{ employee[0] }}</td>
+
+                            <td>{{ employee[1] }}</td>
+
+                            <td>{{ employee[2] }}</td>
+
+                            <td>{{ employee[3] }}</td>
+
+                            <td>{{ employee[4] }}</td>
+
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ employee[5] }}
+                                </span>
+                            </td>
+
+                            <td>
+                                Rs. {{ "{:,.2f}".format(employee[6]) }}
+                            </td>
+
+                            <td>
+                                {{ employee[7].strftime('%Y-%m-%d')
+                                   if employee[7] else '' }}
+                            </td>
+
+                            <td class="text-nowrap">
+
+                                <a
+                                    href="/edit-employee/{{ employee[0] }}"
+                                    class="btn btn-sm btn-primary action-btn">
+                                    Edit
+                                </a>
+
+
+                                <form
+                                    method="POST"
+                                    action="/delete-employee/{{ employee[0] }}"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this employee?');">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-danger">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+
+                            <td colspan="9"
+                                class="text-center py-5">
+
+                                <h5 class="text-muted">
+                                    No employees found
+                                </h5>
+
+                                <p class="text-muted">
+                                    Try another search or department.
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
 
             </div>
 
@@ -226,15 +305,21 @@
     </div>
 
 
-    <!-- Footer -->
-    <footer class="text-center text-muted mt-5 mb-4">
+    <!-- Back -->
+    <div class="mt-4">
 
-        <small>
-            Employee Management System &copy; 2026
-        </small>
+        <a href="/" class="text-decoration-none">
+            ← Back to Dashboard
+        </a>
 
-    </footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+</div>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
 </body>
-
 </html>

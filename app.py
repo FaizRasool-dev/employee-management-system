@@ -189,6 +189,7 @@ def add_employee():
 def employees():
 
     search = request.args.get("search", "").strip()
+    department = request.args.get("department", "").strip()
 
     connection = None
     cursor = None
@@ -197,50 +198,73 @@ def employees():
         connection = get_connection()
         cursor = connection.cursor()
 
+        # Get all departments for filter dropdown
+        cursor.execute("""
+            SELECT DISTINCT department
+            FROM employees
+            WHERE department IS NOT NULL
+            ORDER BY department
+        """)
+
+        departments = [row[0] for row in cursor.fetchall()]
+
+        # Base query
+        query = """
+            SELECT employee_id,
+                   first_name,
+                   last_name,
+                   email,
+                   phone,
+                   department,
+                   salary,
+                   hire_date
+            FROM employees
+            WHERE 1 = 1
+        """
+
+        params = {}
+
+        # Search filter
         if search:
-            query = """
-                SELECT employee_id,
-                       first_name,
-                       last_name,
-                       email,
-                       phone,
-                       department,
-                       salary,
-                       hire_date
-                FROM employees
-                WHERE LOWER(first_name) LIKE LOWER(:search)
-                   OR LOWER(last_name) LIKE LOWER(:search)
-                   OR LOWER(email) LIKE LOWER(:search)
-                   OR LOWER(phone) LIKE LOWER(:search)
-                   OR LOWER(department) LIKE LOWER(:search)
-                ORDER BY employee_id
+            query += """
+                AND (
+                    LOWER(first_name) LIKE LOWER(:search)
+                    OR LOWER(last_name) LIKE LOWER(:search)
+                    OR LOWER(email) LIKE LOWER(:search)
+                    OR LOWER(phone) LIKE LOWER(:search)
+                    OR LOWER(department) LIKE LOWER(:search)
+                )
             """
 
-            cursor.execute(query, {"search": f"%{search}%"})
+            params["search"] = f"%{search}%"
 
-        else:
-            cursor.execute("""
-                SELECT employee_id,
-                       first_name,
-                       last_name,
-                       email,
-                       phone,
-                       department,
-                       salary,
-                       hire_date
-                FROM employees
-                ORDER BY employee_id
-            """)
+        # Department filter
+        if department:
+            query += """
+                AND LOWER(department) = LOWER(:department)
+            """
+
+            params["department"] = department
+
+        query += """
+            ORDER BY employee_id
+        """
+
+        cursor.execute(query, params)
 
         employees = cursor.fetchall()
 
         return render_template(
             "employees.html",
             employees=employees,
-            search=search
+            search=search,
+            department=department,
+            departments=departments,
+            result_count=len(employees)
         )
 
     finally:
+
         if cursor:
             cursor.close()
 
