@@ -49,81 +49,35 @@
 
             <!-- Total Employees -->
             <div class="col-md-4">
-
-                <div class="card text-center shadow-sm h-100">
-
+                <div class="card text-center shadow-sm">
                     <div class="card-body">
-
-                        <h5 class="card-title">
-                            Total Employees
-                        </h5>
-
-                        <h2 class="display-5 fw-bold text-primary">
-                            {{ total_employees }}
-                        </h2>
-
-                        <a href="/employees"
-                           class="btn btn-primary">
-                            View Employees
-                        </a>
-
+                        <h5 class="card-title">Total Employees</h5>
+                         <h2>{{ total_employees }}</h2>
                     </div>
-
                 </div>
-
             </div>
 
 
-            <!-- Add Employee -->
+
+            <!-- Total Departments -->
             <div class="col-md-4">
-
-                <div class="card text-center shadow-sm h-100">
-
+                <div class="card text-center shadow-sm">
                     <div class="card-body">
-
-                        <h5 class="card-title">
-                            Manage Employees
-                        </h5>
-
-                        <p class="text-muted">
-                            Add a new employee to the system.
-                        </p>
-
-                        <a href="/add-employee"
-                           class="btn btn-success">
-                            + Add Employee
-                        </a>
-
+                        <h5 class="card-title">Total Departments</h5>
+                        <h2>{{ total_departments }}</h2>
                     </div>
-
                 </div>
-
             </div>
 
 
-            <!-- Database -->
+            <!-- Average Salary -->
             <div class="col-md-4">
-
-                <div class="card text-center shadow-sm h-100">
-
+                <div class="card text-center shadow-sm">
                     <div class="card-body">
-
-                        <h5 class="card-title">
-                            Database
-                        </h5>
-
-                        <span class="badge bg-success fs-6">
-                            Connected
-                        </span>
-
-                        <p class="text-muted mt-3 mb-0">
-                            Oracle Database
-                        </p>
-
+                        <h5 class="card-title">Average Salary</h5>
+                        <h2>{{ "%.2f"|format(average_salary) }}</h2>
                     </div>
-
                 </div>
-
             </div>
 
         </div>

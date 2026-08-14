@@ -19,12 +19,40 @@ def home():
         connection = get_connection()
         cursor = connection.cursor()
 
+        # Total Employees
         cursor.execute("SELECT COUNT(*) FROM employees")
         total_employees = cursor.fetchone()[0]
 
+        # Total Departments
+        cursor.execute("""
+            SELECT COUNT(DISTINCT department)
+            FROM employees
+            WHERE department IS NOT NULL
+        """)
+        total_departments = cursor.fetchone()[0]
+
+        # Average Salary
+        cursor.execute("""
+            SELECT NVL(AVG(salary), 0)
+            FROM employees
+        """)
+        average_salary = cursor.fetchone()[0]
+
         return render_template(
             "index.html",
-            total_employees=total_employees
+            total_employees=total_employees,
+            total_departments=total_departments,
+            average_salary=average_salary
+        )
+
+    except Exception as e:
+        flash("Unable to load dashboard data.", "danger")
+
+        return render_template(
+            "index.html",
+            total_employees=0,
+            total_departments=0,
+            average_salary=0
         )
 
     finally:
