@@ -257,3 +257,26 @@ https://github.com/FaizRasool-dev
 
 📄 License
 This project is created for portfolio and demonstration purposes.
+
+
+📸 Project Screenshots
+
+📊 Dashboard
+
+![Employee Management System Dashboard](screenshots/dashboard.png)
+
+👥 Employees
+
+![Employees Management](screenshots/employees.png)
+
+👤 Employee Details
+
+![Employee Details](screenshots/employee-details.png)
+
+➕ Add Employee
+
+![Add Employee](screenshots/add-employee.png)
+
+✏️ Edit Employee
+
+![Edit Employee](screenshots/edit-employee.png)
