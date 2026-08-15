@@ -194,6 +194,136 @@
 
         </div>
 
+        <!-- Salary Distribution Chart -->
+        <div class="card shadow-sm border-0 mt-5">
+
+            <div class="card-body">
+
+                <h3 class="fw-bold mb-4">
+                    Salary Distribution
+                </h3>
+
+                {% if salary_ranges %}
+
+                <div style="height: 350px;">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+
+                {% else %}
+
+                <div class="text-center text-muted py-5">
+                    No salary data available.
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- Recent Employees -->
+        <div class="card shadow-sm border-0 mt-5">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <h3 class="fw-bold mb-0">
+                        Recent Employees
+                    </h3>
+
+                    <a href="/employees" class="btn btn-primary btn-sm">
+                        View All Employees
+                    </a>
+
+                </div>
+
+
+                {% if recent_employees %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-dark">
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Salary</th>
+                                <th>Hire Date</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for employee in recent_employees %}
+
+                            <tr>
+
+                                <td>
+                                    {{ employee[0] }}
+                                </td>
+
+
+                                <td>
+                                    <strong>
+                                        {{ employee[1] }} {{ employee[2] }}
+                                    </strong>
+                                </td>
+
+
+                                <td>
+                                    {{ employee[3] or "-" }}
+                                </td>
+
+
+                                <td>
+                                    {{ "{:,.2f}".format(employee[4] or 0) }}
+                                </td>
+
+
+                                <td>
+                                    {{ employee[5].strftime('%Y-%m-%d')
+                                    if employee[5] else "-" }}
+                                </td>
+
+
+                                <td>
+
+                                    <a href="/employee/{{ employee[0] }}"
+                                    class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {% else %}
+
+                <div class="text-center text-muted py-4">
+                    No employees found.
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
         <!-- Salary Analytics -->
         <div class="row g-4 mt-4">
 
@@ -358,6 +488,71 @@
                         label: "Employees",
 
                         data: departmentCounts,
+
+                        borderWidth: 1
+                    }
+                ]
+
+            },
+
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+
+                },
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+    const salaryRanges = {{ salary_ranges | tojson }};
+
+    const salaryCounts = {{ salary_counts | tojson }};
+
+
+    if (salaryRanges.length > 0) {
+
+        const salaryCtx = document
+            .getElementById("salaryChart")
+            .getContext("2d");
+
+
+        new Chart(salaryCtx, {
+
+            type: "bar",
+
+            data: {
+
+                labels: salaryRanges,
+
+                datasets: [
+                    {
+                        label: "Employees",
+
+                        data: salaryCounts,
 
                         borderWidth: 1
                     }

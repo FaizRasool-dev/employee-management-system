@@ -78,7 +78,6 @@ def home():
         department_data = cursor.fetchall()
 
 
-        # Separate department names and employee counts
         department_names = [
             row[0] for row in department_data
         ]
@@ -88,6 +87,68 @@ def home():
         ]
 
 
+        # Salary Distribution
+        cursor.execute("""
+            SELECT
+                CASE
+                    WHEN salary < 50000 THEN 'Below 50K'
+                    WHEN salary < 100000 THEN '50K - 99K'
+                    WHEN salary < 200000 THEN '100K - 199K'
+                    ELSE '200K+'
+                END AS salary_range,
+                COUNT(*) AS employee_count
+            FROM employees
+            WHERE salary IS NOT NULL
+            GROUP BY
+                CASE
+                    WHEN salary < 50000 THEN 'Below 50K'
+                    WHEN salary < 100000 THEN '50K - 99K'
+                    WHEN salary < 200000 THEN '100K - 199K'
+                    ELSE '200K+'
+                END
+            ORDER BY
+                CASE
+                    WHEN MIN(salary) < 50000 THEN 1
+                    WHEN MIN(salary) < 100000 THEN 2
+                    WHEN MIN(salary) < 200000 THEN 3
+                    ELSE 4
+                END
+        """)
+
+        salary_data = cursor.fetchall()
+
+
+        salary_ranges = [
+            row[0] for row in salary_data
+        ]
+
+        salary_counts = [
+            row[1] for row in salary_data
+        ]
+
+        # Recent Employees
+        cursor.execute("""
+            SELECT employee_id,
+                first_name,
+                last_name,
+                department,
+                salary,
+                hire_date
+            FROM (
+                SELECT employee_id,
+                    first_name,
+                    last_name,
+                    department,
+                    salary,
+                    hire_date
+                FROM employees
+                ORDER BY hire_date DESC
+            )
+            WHERE ROWNUM <= 5
+        """)
+
+        recent_employees = cursor.fetchall()
+
         return render_template(
             "index.html",
             total_employees=total_employees,
@@ -96,7 +157,10 @@ def home():
             highest_salary=highest_salary,
             lowest_salary=lowest_salary,
             department_names=department_names,
-            department_counts=department_counts
+            department_counts=department_counts,
+            salary_ranges=salary_ranges,
+            salary_counts=salary_counts,
+            recent_employees=recent_employees
         )
 
 
@@ -112,7 +176,11 @@ def home():
             highest_salary=0,
             lowest_salary=0,
             department_names=[],
-            department_counts=[]
+            department_counts=[],
+            salary_ranges=[],
+            salary_counts=[],
+            recent_employees=[]
+
         )
 
 
